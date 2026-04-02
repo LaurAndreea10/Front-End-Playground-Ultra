@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Front-End Playground Ultra++</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style id="fontStyle"></style>
+<style>
+:root{
+  --bg1:#07111f;--bg2:#111827;--panel:rgba(15,23,42,.86);--panel2:rgba(255,255,255,.05);--text:#f8fafc;--muted:#94a3b8;--accent:#38bdf8;--border:rgba(255,255,255,.08);--shadow:0 18px 48px rgba(0,0,0,.28);--code:#08101d;
+}
+body.light{
+  --bg1:#eef6ff;--bg2:#dbeafe;--panel:rgba(255,255,255,.88);--panel2:rgba(15,23,42,.04);--text:#0f172a;--muted:#475569;--accent:#0284c7;--border:rgba(15,23,42,.08);--shadow:0 16px 38px rgba(15,23,42,.12);--code:#f8fafc;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:
+radial-gradient(circle at top left,rgba(56,189,248,.16),transparent 22%),
+radial-gradient(circle at bottom right,rgba(139,92,246,.16),transparent 26%),
+linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--text)}
+body{padding:14px}
+button,input,select,textarea{font:inherit}
+.app{max-width:1720px;margin:auto;display:grid;gap:16px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:24px;box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.topbar{padding:16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.topbar h1{margin:0 0 6px;font-size:1.2rem}.topbar p{margin:0;color:var(--muted);font-size:.95rem;line-height:1.45}
+.toolbar,.actions,.row,.tabs,.history-actions{display:flex;gap:8px;flex-wrap:wrap}
+.switch{display:inline-flex;gap:4px;padding:4px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--border)}
+.switch button,.chip,.btn,.tab,.history-btn{border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);padding:10px 12px;border-radius:14px;cursor:pointer;font-weight:800}
+.switch button{border:0;border-radius:999px;min-width:58px}
+.switch button.active,.chip.active,.tab.active{background:var(--accent);color:#052130;border-color:transparent}
+.content{display:grid;gap:16px}
+.left,.right{display:grid;gap:16px;align-content:start}
+.panel,.previewCard,.codeCard,.historyCard{padding:16px}
+h2,h3{margin:0 0 14px}
+.controls{display:grid;gap:12px}
+.group{margin-top:4px;color:var(--accent);font-size:.82rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.control{display:grid;gap:8px;padding:12px;background:var(--panel2);border:1px solid rgba(255,255,255,.04);border-radius:18px}
+.labelRow{display:flex;justify-content:space-between;gap:10px;align-items:center}
+label{font-size:.95rem;font-weight:700}.val{color:var(--accent);font-size:.9rem;font-weight:800;white-space:nowrap}
+.grid2,.grid3,.grid4{display:grid;gap:12px}
+.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=color]{width:100%;height:46px;border:0;background:transparent;padding:0;border-radius:12px}
+input[type=text],input[type=file],select,textarea{width:100%;min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);outline:none}
+textarea{min-height:84px;resize:vertical}
+.small{font-size:.84rem;color:var(--muted);line-height:1.4}
+.previewCard{display:grid;gap:14px}
+.device{width:100%;border:1px solid var(--border);background:rgba(255,255,255,.03);border-radius:22px;padding:14px}
+.device.mobile{max-width:390px;margin:auto}.device.tablet{max-width:860px;margin:auto}.device.desktop{max-width:100%}
+.previewWrap{position:relative;min-height:520px;border-radius:18px;overflow:hidden;border:1px dashed rgba(255,255,255,.12);padding:20px;background:
+linear-gradient(135deg,rgba(255,255,255,.03),rgba(255,255,255,.015)),rgba(255,255,255,.02)}
+.previewGrid{position:absolute;inset:0;background:
+linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px),
+linear-gradient(180deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:24px 24px;opacity:.55;pointer-events:none}
+.playground{position:relative;z-index:1;min-height:420px;width:100%;display:flex;align-items:center;justify-content:center}
+.playground.mode-grid{display:grid;place-items:center}.playground.mode-flex{display:flex}
+.target{position:relative;max-width:100%;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;touch-action:none;user-select:none;transform-origin:center}
+.dragHint{position:absolute;left:8px;top:8px;z-index:3;padding:6px 8px;border-radius:999px;background:rgba(0,0,0,.18);color:#fff;font-size:.76rem;font-weight:700;pointer-events:none}
+.resize{position:absolute;right:4px;bottom:4px;width:18px;height:18px;border-radius:6px;background:rgba(255,255,255,.75);border:1px solid rgba(0,0,0,.2);cursor:nwse-resize;z-index:4}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.stat{padding:12px;border-radius:16px;background:var(--panel2);border:1px solid rgba(255,255,255,.04)}
+.stat small{display:block;color:var(--muted);margin-bottom:6px}
+pre,.editor{margin:0;border-radius:16px;padding:14px;background:var(--code);border:1px solid var(--border);overflow:auto;white-space:pre-wrap;word-break:break-word;max-height:560px;font-size:.9rem;line-height:1.55}
+.editor{min-height:180px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.badge{display:inline-flex;align-items:center;min-height:30px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--border);font-size:.82rem}
+.badge.good{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.24);color:#bbf7d0}
+.badge.bad{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.24);color:#fecaca}
+.historyList{display:grid;gap:10px;max-height:320px;overflow:auto}
+.historyItem{padding:10px;border-radius:14px;background:var(--panel2);border:1px solid rgba(255,255,255,.05);display:grid;gap:8px}
+.hidden{display:none!important}
+#manualStyle{pointer-events:none}
+@media (min-width:1180px){.content{grid-template-columns:560px minmax(0,1fr)}}
+@media (max-width:900px){.grid4,.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.grid2,.grid3,.grid4,.stats{grid-template-columns:1fr}.previewWrap{min-height:420px}}
+</style>
+<style id="hoverStyle"></style>
+<style id="manualStyle"></style>
+</head>
+<body>
+<div class="app">
+  <header class="card topbar">
+    <div>
+      <h1 id="title">Front-End Playground Ultra++</h1>
+      <p id="subtitle">Editor all-in-one cu responsive controls, export multiplu, mini code editor și preview live.</p>
+    </div>
+    <div class="toolbar">
+      <div class="switch">
+        <button id="solidBtn" class="active" type="button">Solid</button>
+        <button id="gradientBtn" type="button">Gradient</button>
+      </div>
+      <div class="switch">
+        <button id="roBtn" class="active" type="button">RO</button>
+        <button id="enBtn" type="button">EN</button>
+      </div>
+      <div class="switch">
+        <button id="darkBtn" class="active" type="button">Dark</button>
+        <button id="lightBtn" type="button">Light</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="left">
+      <section class="card panel">
+        <h2 id="controlsTitle">Controale</h2>
+        <div class="controls">
+          <div class="group">Responsive target</div>
+          <div class="row">
+            <button class="chip active" data-bp="base" type="button">Base</button>
+            <button class="chip" data-bp="mobile" type="button">Mobile</button>
+            <button class="chip" data-bp="tablet" type="button">Tablet</button>
+            <button class="chip" data-bp="desktop" type="button">Desktop</button>
+          </div>
+
+          <div class="group">Presets</div>
+          <div class="grid2">
+            <button class="btn" data-preset="glass" type="button">Glass</button>
+            <button class="btn" data-preset="sunset" type="button">Sunset</button>
+            <button class="btn" data-preset="neon" type="button">Neon</button>
+            <button class="btn" data-preset="minimal" type="button">Minimal</button>
+          </div>
+
+          <div class="group">Preset manager</div>
+          <div class="grid2">
+            <div class="control">
+              <div class="labelRow"><label for="presetName">Preset name</label></div>
+              <input id="presetName" type="text" placeholder="My preset">
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="presetSelect">Saved presets</label></div>
+              <select id="presetSelect"></select>
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn" id="savePreset" type="button">Save preset</button>
+            <button class="btn" id="loadPreset" type="button">Load preset</button>
+            <button class="btn" id="deletePreset" type="button">Delete preset</button>
+            <button class="btn" id="shareBtn" type="button">Copy share URL</button>
+          </div>
+
+          <div class="group">Templates</div>
+          <div class="grid2">
+            <button class="btn" data-template="box" type="button">Box</button>
+            <button class="btn" data-template="button" type="button">Button</button>
+            <button class="btn" data-template="card" type="button">Card</button>
+            <button class="btn" data-template="input" type="button">Input</button>
+          </div>
+
+          <div class="group">Layout mode</div>
+          <div class="row">
+            <button class="chip active" data-layout="single" type="button">Single</button>
+            <button class="chip" data-layout="flex" type="button">Flex</button>
+            <button class="chip" data-layout="grid" type="button">Grid</button>
+          </div>
+
+          <div class="group">Background</div>
+          <div class="control" id="solidWrap">
+            <div class="labelRow"><label for="bgColor">Background color</label><span class="val" id="bgColorVal"></span></div>
+            <input id="bgColor" type="color" value="#4f46e5">
+          </div>
+
+          <div class="control hidden" id="gradientTypeWrap">
+            <div class="labelRow"><label for="gradientType">Gradient type</label><span class="val" id="gradientTypeVal"></span></div>
+            <select id="gradientType">
+              <option value="linear">linear</option>
+              <option value="radial">radial</option>
+              <option value="conic">conic</option>
+              <option value="mesh">mesh</option>
+            </select>
+          </div>
+
+          <div class="grid2 hidden" id="gradientWrap">
+            <div class="control">
+              <div class="labelRow"><label for="c1">Stop 1</label><span class="val" id="c1Val"></span></div>
+              <input id="c1" type="color" value="#4f46e5">
+              <input id="p1" type="range" min="0" max="100" value="0">
+              <span class="val" id="p1Val"></span>
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="c2">Stop 2</label><span class="val" id="c2Val"></span></div>
+              <input id="c2" type="color" value="#06b6d4">
+              <input id="p2" type="range" min="0" max="100" value="35">
+              <span class="val" id="p2Val"></span>
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="c3">Stop 3</label><span class="val" id="c3Val"></span></div>
+              <input id="c3" type="color" value="#8b5cf6">
+              <input id="p3" type="range" min="0" max="100" value="68">
+              <span class="val" id="p3Val"></span>
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="c4">Stop 4</label><span class="val" id="c4Val"></span></div>
+              <input id="c4" type="color" value="#ec4899">
+              <input id="p4" type="range" min="0" max="100" value="100">
+              <span class="val" id="p4Val"></span>
+            </div>
+          </div>
+
+          <div class="grid3 hidden" id="gradientAdvanced">
+            <div class="control">
+              <div class="labelRow"><label for="angle">Angle</label><span class="val" id="angleVal"></span></div>
+              <input id="angle" type="range" min="0" max="360" value="135">
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="radialX">Radial X</label><span class="val" id="radialXVal"></span></div>
+              <input id="radialX" type="range" min="0" max="100" value="50">
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="radialY">Radial Y</label><span class="val" id="radialYVal"></span></div>
+              <input id="radialY" type="range" min="0" max="100" value="50">
+            </div>
+          </div>
+
+          <div class="grid2">
+            <div class="control">
+              <div class="labelRow"><label for="bgImage">Background image</label></div>
+              <input id="bgImage" type="file" accept="image/*">
+              <div class="small">Upload image for background layer.</div>
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="bgImageSize">Image size</label><span class="val" id="bgImageSizeVal"></span></div>
+              <select id="bgImageSize">
+                <option value="cover">cover</option>
+                <option value="contain">contain</option>
+                <option value="auto">auto</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <button class="chip" id="noiseBtn" type="button">Noise</button>
+            <button class="chip" id="meshBtn" type="button">Mesh</button>
+          </div>
+
+          <div class="group">Text</div>
+          <div class="control">
+            <div class="labelRow"><label for="content">Content</label><span class="val" id="contentVal"></span></div>
+            <textarea id="content">Live Preview</textarea>
+          </div>
+
+          <div class="grid2">
+            <div class="control">
+              <div class="labelRow"><label for="textColor">Text color</label><span class="val" id="textColorVal"></span></div>
+              <input id="textColor" type="color" value="#ffffff">
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="fontFamily">Google font</label><span class="val" id="fontFamilyVal"></span></div>
+              <select id="fontFamily">
+                <option>Inter</option><option>Poppins</option><option>Roboto</option><option>Montserrat</option>
+                <option>Playfair Display</option><option>DM Sans</option><option>Space Grotesk</option>
+                <option>Outfit</option><option>Manrope</option><option>Nunito</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid4">
+            <div class="control">
+              <div class="labelRow"><label for="fontSize">Font size</label><span class="val" id="fontSizeVal"></span></div>
+              <input id="fontSize" type="range" min="10" max="72" value="20">
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="fontWeight">Weight</label><span class="val" id="fontWeightVal"></span></div>
+              <select id="fontWeight">
+                <option>300</option><option>400</option><option>500</option><option>600</option><option selected>700</option><option>800</option><option>900</option>
+              </select>
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="letterSpacing">Letter spacing</label><span class="val" id="letterSpacingVal"></span></div>
+              <input id="letterSpacing" type="range" min="-2" max="20" step="0.1" value="0">
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="lineHeight">Line height</label><span class="val" id="lineHeightVal"></span></div>
+              <input id="lineHeight" type="range" min="0.8" max="3" step="0.05" value="1.2">
+            </div>
+          </div>
+
+          <div class="grid3">
+            <div class="control">
+              <div class="labelRow"><label for="textAlign">Text align</label><span class="val" id="textAlignVal"></span></div>
+              <select id="textAlign"><option>left</option><option selected>center</option><option>right</option></select>
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="textTransform">Transform</label><span class="val" id="textTransformVal"></span></div>
+              <select id="textTransform"><option selected>none</option><option>uppercase</option><option>lowercase</option><option>capitalize</option></select>
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="textShadowBlur">Text shadow</label><span class="val" id="textShadowBlurVal"></span></div>
+              <input id="textShadowBlur" type="range" min="0" max="40" value="0">
+            </div>
+          </div>
+
+          <div class="grid3">
+            <div class="control">
+              <div class="labelRow"><label for="textShadowX">Text shadow X</label><span class="val" id="textShadowXVal"></span></div>
+              <input id="textShadowX" type="range" min="-20" max="20" value="0">
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="textShadowY">Text shadow Y</label><span class="val" id="textShadowYVal"></span></div>
+              <input id="textShadowY" type="range" min="-20" max="20" value="0">
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="textShadowColor">Text shadow color</label><span class="val" id="textShadowColorVal"></span></div>
+              <input id="textShadowColor" type="color" value="#000000">
+            </div>
+          </div>
+
+          <div class="group">Box</div>
+          <div class="grid4">
+            <div class="control">
+              <div class="labelRow"><label for="boxWidth">Width</label><span class="val" id="boxWidthVal"></span></div>
+              <input id="boxWidth" type="range" min="80" max="900" value="320">
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="boxHeight">Height</label><span class="val" id="boxHeightVal"></span></div>
+              <input id="boxHeight" type="range" min="40" max="700" value="200">
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="paddingX">Padding X</label><span class="val" id="paddingXVal"></span></div>
+              <input id="paddingX" type="range" min="0" max="120" value="24">
+            </div>
+            <div class="control">
+              <div class="labelRow"><label for="paddingY">Padding Y</label><span class="val" id="paddingYVal"></span></div>
+              <input id="paddingY" type="range" min="0" max="120" value="16">
+            </div>
+          </div>
+
+          <div class="group">Corner radius</div>
+          <div class="grid4">
+            <div class="control"><div class="labelRow"><label for="radiusTl">TL</label><span class="val" id="radiusTlVal"></span></div><input id="radiusTl" type="range" min="0" max="160" value="24"></div>
+            <div class="control"><div class="labelRow"><label for="radiusTr">TR</label><span class="val" id="radiusTrVal"></span></div><input id="radiusTr" type="range" min="0" max="160" value="24"></div>
+            <div class="control"><div class="labelRow"><label for="radiusBr">BR</label><span class="val" id="radiusBrVal"></span></div><input id="radiusBr" type="range" min="0" max="160" value="24"></div>
+            <div class="control"><div class="labelRow"><label for="radiusBl">BL</label><span class="val" id="radiusBlVal"></span></div><input id="radiusBl" type="range" min="0" max="160" value="24"></div>
+          </div>
+
+          <div class="group">Border per side</div>
+          <div class="grid4">
+            <div class="control"><div class="labelRow"><label for="btw">Top</label><span class="val" id="btwVal"></span></div><input id="btw" type="range" min="0" max="20" value="2"><input id="btc" type="color" value="#ffffff"></div>
+            <div class="control"><div class="labelRow"><label for="brw">Right</label><span class="val" id="brwVal"></span></div><input id="brw" type="range" min="0" max="20" value="2"><input id="brc" type="color" value="#ffffff"></div>
+            <div class="control"><div class="labelRow"><label for="bbw">Bottom</label><span class="val" id="bbwVal"></span></div><input id="bbw" type="range" min="0" max="20" value="2"><input id="bbc" type="color" value="#ffffff"></div>
+            <div class="control"><div class="labelRow"><label for="blw">Left</label><span class="val" id="blwVal"></span></div><input id="blw" type="range" min="0" max="20" value="2"><input id="blc" type="color" value="#ffffff"></div>
+          </div>
+
+          <div class="control">
+            <div class="labelRow"><label for="borderStyle">Border style</label><span class="val" id="borderStyleVal"></span></div>
+            <select id="borderStyle"><option>solid</option><option>dashed</option><option>dotted</option><option>double</option></select>
+          </div>
+
+          <div class="group">Effects</div>
+          <div class="grid4">
+            <div class="control"><div class="labelRow"><label for="opacity">Opacity</label><span class="val" id="opacityVal"></span></div><input id="opacity" type="range" min="0.1" max="1" step="0.01" value="1"></div>
+            <div class="control"><div class="labelRow"><label for="backdropBlur">Backdrop blur</label><span class="val" id="backdropBlurVal"></span></div><input id="backdropBlur" type="range" min="0" max="40" value="0"></div>
+            <div class="control"><div class="labelRow"><label for="rotate">Rotate</label><span class="val" id="rotateVal"></span></div><input id="rotate" type="range" min="-30" max="30" value="0"></div>
+            <div class="control"><div class="labelRow"><label for="scale">Scale</label><span class="val" id="scaleVal"></span></div><input id="scale" type="range" min="0.5" max="1.5" step="0.01" value="1"></div>
+          </div>
+
+          <div class="group">Outer shadow</div>
+          <div class="grid4">
+            <div class="control"><div class="labelRow"><label for="shadowX">X</label><span class="val" id="shadowXVal"></span></div><input id="shadowX" type="range" min="-60" max="60" value="0"></div>
+            <div class="control"><div class="labelRow"><label for="shadowY">Y</label><span class="val" id="shadowYVal"></span></div><input id="shadowY" type="range" min="-40" max="80" value="18"></div>
+            <div class="control"><div class="labelRow"><label for="shadowBlur">Blur</label><span class="val" id="shadowBlurVal"></span></div><input id="shadowBlur" type="range" min="0" max="140" value="30"></div>
+            <div class="control"><div class="labelRow"><label for="shadowSpread">Spread</label><span class="val" id="shadowSpreadVal"></span></div><input id="shadowSpread" type="range" min="-40" max="50" value="0"></div>
+          </div>
+
+          <div class="grid2">
+            <div class="control"><div class="labelRow"><label for="shadowOpacity">Opacity</label><span class="val" id="shadowOpacityVal"></span></div><input id="shadowOpacity" type="range" min="0" max="1" step="0.01" value="0.25"></div>
+            <div class="control"><div class="labelRow"><label for="shadowColor">Color</label><span class="val" id="shadowColorVal"></span></div><input id="shadowColor" type="color" value="#000000"></div>
+          </div>
+
+          <div class="group">Inset shadow</div>
+          <div class="grid4">
+            <div class="control"><div class="labelRow"><label for="isx">Inset X</label><span class="val" id="isxVal"></span></div><input id="isx" type="range" min="-60" max="60" value="0"></div>
+            <div class="control"><div class="labelRow"><label for="isy">Inset Y</label><span class="val" id="isyVal"></span></div><input id="isy" type="range" min="-60" max="60" value="0"></div>
+            <div class="control"><div class="labelRow"><label for="isb">Inset blur</label><span class="val" id="isbVal"></span></div><input id="isb" type="range" min="0" max="140" value="0"></div>
+            <div class="control"><div class="labelRow"><label for="iss">Inset spread</label><span class="val" id="issVal"></span></div><input id="iss" type="range" min="-40" max="50" value="0"></div>
+          </div>
+          <div class="grid2">
+            <div class="control"><div class="labelRow"><label for="iso">Inset opacity</label><span class="val" id="isoVal"></span></div><input id="iso" type="range" min="0" max="1" step="0.01" value="0"></div>
+            <div class="control"><div class="labelRow"><label for="isc">Inset color</label><span class="val" id="iscVal"></span></div><input id="isc" type="color" value="#000000"></div>
+          </div>
+
+          <div class="group">Animation + hover</div>
+          <div class="grid4">
+            <div class="control">
+              <div class="labelRow"><label for="anim">Animation</label><span class="val" id="animVal"></span></div>
+              <select id="anim"><option>none</option><option>pulse</option><option>float</option><option>rotate</option><option>fade</option></select>
+            </div>
+            <div class="control"><div class="labelRow"><label for="dur">Duration</label><span class="val" id="durVal"></span></div><input id="dur" type="range" min="0" max="3000" step="50" value="300"></div>
+            <div class="control"><div class="labelRow"><label for="delay">Delay</label><span class="val" id="delayVal"></span></div><input id="delay" type="range" min="0" max="2000" step="50" value="0"></div>
+            <div class="control">
+              <div class="labelRow"><label for="ease">Easing</label><span class="val" id="easeVal"></span></div>
+              <select id="ease"><option>ease</option><option>linear</option><option>ease-in</option><option>ease-out</option><option>ease-in-out</option><option value="cubic-bezier(.2,.8,.2,1)">cubic-bezier</option></select>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="control"><div class="labelRow"><label for="hoverScale">Hover scale</label><span class="val" id="hoverScaleVal"></span></div><input id="hoverScale" type="range" min="0.8" max="1.3" step="0.01" value="1"></div>
+            <div class="control"><div class="labelRow"><label for="hoverRotate">Hover rotate</label><span class="val" id="hoverRotateVal"></span></div><input id="hoverRotate" type="range" min="-30" max="30" value="0"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card historyCard">
+        <h2>History snapshots</h2>
+        <div class="row">
+          <button class="btn" id="addSnap" type="button">Add snapshot</button>
+          <button class="btn" id="clearSnap" type="button">Clear snapshots</button>
+        </div>
+        <div class="historyList" id="historyList"></div>
+      </section>
+    </div>
+
+    <div class="right">
+      <section class="card previewCard">
+        <h2>Preview</h2>
+        <div class="tabs">
+          <button class="tab active" data-device="mobile" type="button">Mobile</button>
+          <button class="tab" data-device="tablet" type="button">Tablet</button>
+          <button class="tab" data-device="desktop" type="button">Desktop</button>
+        </div>
+
+        <div class="device mobile" id="device">
+          <div class="previewWrap" id="previewWrap">
+            <div class="previewGrid" id="previewGrid"></div>
+            <div class="playground mode-single" id="playground">
+              <div class="target" id="target">
+                <span class="dragHint">drag</span>
+                <div id="targetContent">Live Preview</div>
+                <div class="resize" id="resize"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="small">Drag and resize directly in preview.</p>
+
+        <div class="stats">
+          <div class="stat"><small>Contrast</small><strong id="contrastText">--</strong></div>
+          <div class="stat"><small>Mode</small><strong id="modeText">Solid</strong></div>
+          <div class="stat"><small>Size</small><strong id="sizeText">320 × 200</strong></div>
+          <div class="stat"><small>Export</small><strong id="exportText">CSS</strong></div>
+        </div>
+      </section>
+
+      <section class="card codeCard">
+        <h2>Export</h2>
+        <div class="tabs">
+          <button class="tab active" data-code="css" type="button">CSS</button>
+          <button class="tab" data-code="vars" type="button">CSS Vars</button>
+          <button class="tab" data-code="tailwind" type="button">Tailwind</button>
+          <button class="tab" data-code="scss" type="button">SCSS</button>
+          <button class="tab" data-code="react" type="button">React</button>
+          <button class="tab" data-code="inline" type="button">Inline style</button>
+          <button class="tab" data-code="html" type="button">HTML</button>
+          <button class="tab" data-code="full" type="button">Full HTML</button>
+        </div>
+        <pre id="code"></pre>
+
+        <div class="actions">
+          <button class="btn" id="copyCode" type="button">Copy code</button>
+          <button class="btn" id="downloadHtml" type="button">Download .html</button>
+          <button class="btn" id="copyReact" type="button">Copy React</button>
+          <button class="btn" id="copyInline" type="button">Copy inline object</button>
+          <button class="btn" id="randomize" type="button">Randomize</button>
+          <button class="btn" id="undo" type="button">Undo</button>
+          <button class="btn" id="redo" type="button">Redo</button>
+          <button class="btn" id="saveCfg" type="button">Save</button>
+          <button class="btn" id="loadCfg" type="button">Load</button>
+          <button class="btn" id="reset" type="button">Reset</button>
+        </div>
+
+        <div class="row">
+          <span class="badge" id="contrastBadge">Contrast: --</span>
+          <span class="badge" id="bpBadge">Breakpoint: base</span>
+          <span class="badge" id="templateBadge">Template: box</span>
+        </div>
+
+        <h3>Mini code editor</h3>
+        <textarea class="editor" id="manualCss" spellcheck="false"></textarea>
+        <div class="row">
+          <button class="btn" id="applyManual" type="button">Apply manual CSS</button>
+          <button class="btn" id="resetManual" type="button">Reset manual CSS</button>
+        </div>
+        <p class="small">Paste only CSS declarations for .target, for example: background:red;border-radius:40px;</p>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+const T={
+  ro:{title:"Front-End Playground Ultra++",subtitle:"Editor all-in-one cu responsive controls, export multiplu, mini code editor și preview live.",copied:"Cod copiat!",saved:"Config salvată!",loaded:"Config încărcată!",shared:"Link copiat!",applied:"Aplicat!",snap:"Snapshot adăugat!",ok:"OK",bad:"Low"},
+  en:{title:"Front-End Playground Ultra++",subtitle:"All-in-one editor with responsive controls, multi export, mini code editor, and live preview.",copied:"Code copied!",saved:"Config saved!",loaded:"Config loaded!",shared:"Link copied!",applied:"Applied!",snap:"Snapshot added!",ok:"OK",bad:"Low"}
+};
+const FONTS=["Inter","Poppins","Roboto","Montserrat","Playfair Display","DM Sans","Space Grotesk","Outfit","Manrope","Nunito"];
+const CFG_KEY="fe_ultra_plus_cfg",PRESET_KEY="fe_ultra_plus_presets",SNAP_KEY="fe_ultra_plus_snaps";
+const D=()=>({boxWidth:320,boxHeight:200,fontSize:20,paddingX:24,paddingY:16});
+const DEFAULT={
+  lang:"ro",theme:"dark",mode:"solid",bp:"base",device:"mobile",codeTab:"css",layout:"single",template:"box",noise:false,mesh:false,
+  bgImage:"",bgImageSize:"cover",content:"Live Preview",fontFamily:"Inter",bgColor:"#4f46e5",textColor:"#ffffff",
+  gradientType:"linear",c1:"#4f46e5",c2:"#06b6d4",c3:"#8b5cf6",c4:"#ec4899",p1:0,p2:35,p3:68,p4:100,angle:135,radialX:50,radialY:50,
+  fontWeight:"700",letterSpacing:0,lineHeight:1.2,textAlign:"center",textTransform:"none",
+  tsx:0,tsy:0,tsb:0,tsc:"#000000",
+  radiusTl:24,radiusTr:24,radiusBr:24,radiusBl:24,borderStyle:"solid",
+  btw:2,brw:2,bbw:2,blw:2,btc:"#ffffff",brc:"#ffffff",bbc:"#ffffff",blc:"#ffffff",
+  opacity:1,backdropBlur:0,rotate:0,scale:1,
+  shadowX:0,shadowY:18,shadowBlur:30,shadowSpread:0,shadowOpacity:.25,shadowColor:"#000000",
+  isx:0,isy:0,isb:0,iss:0,iso:0,isc:"#000000",
+  anim:"none",dur:300,delay:0,ease:"ease",hoverScale:1,hoverRotate:0,manualCss:"",dragX:0,dragY:0,
+  responsive:{base:D(),mobile:D(),tablet:D(),desktop:D()}
+};
+let S=clone(DEFAULT),undoStack=[],redoStack=[],snapshots=[],presets={},syncing=false,drag=null,resz=null;
+const $=id=>document.getElementById(id);
+const el={
+title:$("title"),subtitle:$("subtitle"),solidBtn:$("solidBtn"),gradientBtn:$("gradientBtn"),roBtn:$("roBtn"),enBtn:$("enBtn"),darkBtn:$("darkBtn"),lightBtn:$("lightBtn"),
+presetName:$("presetName"),presetSelect:$("presetSelect"),savePreset:$("savePreset"),loadPreset:$("loadPreset"),deletePreset:$("deletePreset"),shareBtn:$("shareBtn"),
+noiseBtn:$("noiseBtn"),meshBtn:$("meshBtn"),
+bgColor:$("bgColor"),gradientType:$("gradientType"),c1:$("c1"),c2:$("c2"),c3:$("c3"),c4:$("c4"),p1:$("p1"),p2:$("p2"),p3:$("p3"),p4:$("p4"),angle:$("angle"),radialX:$("radialX"),radialY:$("radialY"),bgImage:$("bgImage"),bgImageSize:$("bgImageSize"),
+content:$("content"),textColor:$("textColor"),fontFamily:$("fontFamily"),fontSize:$("fontSize"),fontWeight:$("fontWeight"),letterSpacing:$("letterSpacing"),lineHeight:$("lineHeight"),textAlign:$("textAlign"),textTransform:$("textTransform"),textShadowX:$("textShadowX"),textShadowY:$("textShadowY"),textShadowBlur:$("textShadowBlur"),textShadowColor:$("textShadowColor"),
+boxWidth:$("boxWidth"),boxHeight:$("boxHeight"),paddingX:$("paddingX"),paddingY:$("paddingY"),
+radiusTl:$("radiusTl"),radiusTr:$("radiusTr"),radiusBr:$("radiusBr"),radiusBl:$("radiusBl"),
+borderStyle:$("borderStyle"),btw:$("btw"),brw:$("brw"),bbw:$("bbw"),blw:$("blw"),btc:$("btc"),brc:$("brc"),bbc:$("bbc"),blc:$("blc"),
+opacity:$("opacity"),backdropBlur:$("backdropBlur"),rotate:$("rotate"),scale:$("scale"),
+shadowX:$("shadowX"),shadowY:$("shadowY"),shadowBlur:$("shadowBlur"),shadowSpread:$("shadowSpread"),shadowOpacity:$("shadowOpacity"),shadowColor:$("shadowColor"),
+isx:$("isx"),isy:$("isy"),isb:$("isb"),iss:$("iss"),iso:$("iso"),isc:$("isc"),
+anim:$("anim"),dur:$("dur"),delay:$("delay"),ease:$("ease"),hoverScale:$("hoverScale"),hoverRotate:$("hoverRotate"),
+device:$("device"),previewWrap:$("previewWrap"),previewGrid:$("previewGrid"),playground:$("playground"),target:$("target"),targetContent:$("targetContent"),resize:$("resize"),
+code:$("code"),manualCss:$("manualCss"),
+copyCode:$("copyCode"),downloadHtml:$("downloadHtml"),copyReact:$("copyReact"),copyInline:$("copyInline"),randomize:$("randomize"),undo:$("undo"),redo:$("redo"),saveCfg:$("saveCfg"),loadCfg:$("loadCfg"),reset:$("reset"),
+applyManual:$("applyManual"),resetManual:$("resetManual"),historyList:$("historyList"),addSnap:$("addSnap"),clearSnap:$("clearSnap"),
+contrastText:$("contrastText"),modeText:$("modeText"),sizeText:$("sizeText"),exportText:$("exportText"),contrastBadge:$("contrastBadge"),bpBadge:$("bpBadge"),templateBadge:$("templateBadge"),
+solidWrap:$("solidWrap"),gradientTypeWrap:$("gradientTypeWrap"),gradientWrap:$("gradientWrap"),gradientAdvanced:$("gradientAdvanced"),
+bgColorVal:$("bgColorVal"),gradientTypeVal:$("gradientTypeVal"),c1Val:$("c1Val"),c2Val:$("c2Val"),c3Val:$("c3Val"),c4Val:$("c4Val"),p1Val:$("p1Val"),p2Val:$("p2Val"),p3Val:$("p3Val"),p4Val:$("p4Val"),angleVal:$("angleVal"),radialXVal:$("radialXVal"),radialYVal:$("radialYVal"),bgImageSizeVal:$("bgImageSizeVal"),contentVal:$("contentVal"),textColorVal:$("textColorVal"),fontFamilyVal:$("fontFamilyVal"),fontSizeVal:$("fontSizeVal"),fontWeightVal:$("fontWeightVal"),letterSpacingVal:$("letterSpacingVal"),lineHeightVal:$("lineHeightVal"),textAlignVal:$("textAlignVal"),textTransformVal:$("textTransformVal"),textShadowBlurVal:$("textShadowBlurVal"),textShadowXVal:$("textShadowXVal"),textShadowYVal:$("textShadowYVal"),textShadowColorVal:$("textShadowColorVal"),
+boxWidthVal:$("boxWidthVal"),boxHeightVal:$("boxHeightVal"),paddingXVal:$("paddingXVal"),paddingYVal:$("paddingYVal"),radiusTlVal:$("radiusTlVal"),radiusTrVal:$("radiusTrVal"),radiusBrVal:$("radiusBrVal"),radiusBlVal:$("radiusBlVal"),borderStyleVal:$("borderStyleVal"),btwVal:$("btwVal"),brwVal:$("brwVal"),bbwVal:$("bbwVal"),blwVal:$("blwVal"),opacityVal:$("opacityVal"),backdropBlurVal:$("backdropBlurVal"),rotateVal:$("rotateVal"),scaleVal:$("scaleVal"),shadowXVal:$("shadowXVal"),shadowYVal:$("shadowYVal"),shadowBlurVal:$("shadowBlurVal"),shadowSpreadVal:$("shadowSpreadVal"),shadowOpacityVal:$("shadowOpacityVal"),shadowColorVal:$("shadowColorVal"),isxVal:$("isxVal"),isyVal:$("isyVal"),isbVal:$("isbVal"),issVal:$("issVal"),isoVal:$("isoVal"),iscVal:$("iscVal"),animVal:$("animVal"),durVal:$("durVal"),delayVal:$("delayVal"),easeVal:$("easeVal"),hoverScaleVal:$("hoverScaleVal"),hoverRotateVal:$("hoverRotateVal")
+};
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function temp(btn,txt,ms=1200){const t=btn.textContent;btn.textContent=txt;setTimeout(()=>btn.textContent=t,ms)}
+function pushUndo(){undoStack.push(clone(S));if(undoStack.length>80)undoStack.shift();redoStack=[]}
+function rgba(hex,a){const h=hex.replace("#","");const v=parseInt(h,16);const r=(v>>16)&255,g=(v>>8)&255,b=v&255;return `rgba(${r},${g},${b},${a})`}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function curr(){return S.responsive[S.bp]}
+function applyRespInputs(){el.boxWidth.value=curr().boxWidth;el.boxHeight.value=curr().boxHeight;el.fontSize.value=curr().fontSize;el.paddingX.value=curr().paddingX;el.paddingY.value=curr().paddingY}
+function readRespInputs(){curr().boxWidth=+el.boxWidth.value;curr().boxHeight=+el.boxHeight.value;curr().fontSize=+el.fontSize.value;curr().paddingX=+el.paddingX.value;curr().paddingY=+el.paddingY.value}
+function updateFont(){const f=encodeURIComponent(S.fontFamily).replace(/%20/g,"+");$("fontStyle").textContent=`@import url('https://fonts.googleapis.com/css2?family=${f}:wght@300;400;500;600;700;800;900&display=swap');`}
+function syncFromInputs(){if(syncing)return;readRespInputs();S.content=el.content.value||"Live Preview";S.fontFamily=el.fontFamily.value;S.bgColor=el.bgColor.value;S.textColor=el.textColor.value;S.gradientType=el.gradientType.value;S.c1=el.c1.value;S.c2=el.c2.value;S.c3=el.c3.value;S.c4=el.c4.value;S.p1=+el.p1.value;S.p2=+el.p2.value;S.p3=+el.p3.value;S.p4=+el.p4.value;S.angle=+el.angle.value;S.radialX=+el.radialX.value;S.radialY=+el.radialY.value;S.bgImageSize=el.bgImageSize.value;S.fontWeight=el.fontWeight.value;S.letterSpacing=+el.letterSpacing.value;S.lineHeight=+el.lineHeight.value;S.textAlign=el.textAlign.value;S.textTransform=el.textTransform.value;S.tsx=+el.textShadowX.value;S.tsy=+el.textShadowY.value;S.tsb=+el.textShadowBlur.value;S.tsc=el.textShadowColor.value;S.radiusTl=+el.radiusTl.value;S.radiusTr=+el.radiusTr.value;S.radiusBr=+el.radiusBr.value;S.radiusBl=+el.radiusBl.value;S.borderStyle=el.borderStyle.value;S.btw=+el.btw.value;S.brw=+el.brw.value;S.bbw=+el.bbw.value;S.blw=+el.blw.value;S.btc=el.btc.value;S.brc=el.brc.value;S.bbc=el.bbc.value;S.blc=el.blc.value;S.opacity=+el.opacity.value;S.backdropBlur=+el.backdropBlur.value;S.rotate=+el.rotate.value;S.scale=+el.scale.value;S.shadowX=+el.shadowX.value;S.shadowY=+el.shadowY.value;S.shadowBlur=+el.shadowBlur.value;S.shadowSpread=+el.shadowSpread.value;S.shadowOpacity=+el.shadowOpacity.value;S.shadowColor=el.shadowColor.value;S.isx=+el.isx.value;S.isy=+el.isy.value;S.isb=+el.isb.value;S.iss=+el.iss.value;S.iso=+el.iso.value;S.isc=el.isc.value;S.anim=el.anim.value;S.dur=+el.dur.value;S.delay=+el.delay.value;S.ease=el.ease.value;S.hoverScale=+el.hoverScale.value;S.hoverRotate=+el.hoverRotate.value}
+function setInputs(){syncing=true;applyRespInputs();el.content.value=S.content;el.fontFamily.value=S.fontFamily;el.bgColor.value=S.bgColor;el.textColor.value=S.textColor;el.gradientType.value=S.gradientType;el.c1.value=S.c1;el.c2.value=S.c2;el.c3.value=S.c3;el.c4.value=S.c4;el.p1.value=S.p1;el.p2.value=S.p2;el.p3.value=S.p3;el.p4.value=S.p4;el.angle.value=S.angle;el.radialX.value=S.radialX;el.radialY.value=S.radialY;el.bgImageSize.value=S.bgImageSize;el.fontWeight.value=S.fontWeight;el.letterSpacing.value=S.letterSpacing;el.lineHeight.value=S.lineHeight;el.textAlign.value=S.textAlign;el.textTransform.value=S.textTransform;el.textShadowX.value=S.tsx;el.textShadowY.value=S.tsy;el.textShadowBlur.value=S.tsb;el.textShadowColor.value=S.tsc;el.radiusTl.value=S.radiusTl;el.radiusTr.value=S.radiusTr;el.radiusBr.value=S.radiusBr;el.radiusBl.value=S.radiusBl;el.borderStyle.value=S.borderStyle;el.btw.value=S.btw;el.brw.value=S.brw;el.bbw.value=S.bbw;el.blw.value=S.blw;el.btc.value=S.btc;el.brc.value=S.brc;el.bbc.value=S.bbc;el.blc.value=S.blc;el.opacity.value=S.opacity;el.backdropBlur.value=S.backdropBlur;el.rotate.value=S.rotate;el.scale.value=S.scale;el.shadowX.value=S.shadowX;el.shadowY.value=S.shadowY;el.shadowBlur.value=S.shadowBlur;el.shadowSpread.value=S.shadowSpread;el.shadowOpacity.value=S.shadowOpacity;el.shadowColor.value=S.shadowColor;el.isx.value=S.isx;el.isy.value=S.isy;el.isb.value=S.isb;el.iss.value=S.iss;el.iso.value=S.iso;el.isc.value=S.isc;el.anim.value=S.anim;el.dur.value=S.dur;el.delay.value=S.delay;el.ease.value=S.ease;el.hoverScale.value=S.hoverScale;el.hoverRotate.value=S.hoverRotate;el.manualCss.value=S.manualCss||"";syncing=false}
+function stops(){return `${S.c1} ${S.p1}%, ${S.c2} ${S.p2}%, ${S.c3} ${S.p3}%, ${S.c4} ${S.p4}%`}
+function bgLayer(){if(S.gradientType==="radial")return `radial-gradient(circle at ${S.radialX}% ${S.radialY}%, ${stops()})`;if(S.gradientType==="conic")return `conic-gradient(from ${S.angle}deg at ${S.radialX}% ${S.radialY}%, ${stops()})`;if(S.gradientType==="mesh")return `radial-gradient(circle at 20% 20%, ${S.c1} 0%, transparent 40%), radial-gradient(circle at 80% 25%, ${S.c2} 0%, transparent 35%), radial-gradient(circle at 35% 80%, ${S.c3} 0%, transparent 42%), radial-gradient(circle at 80% 80%, ${S.c4} 0%, transparent 40%), linear-gradient(${S.angle}deg, ${stops()})`;return `linear-gradient(${S.angle}deg, ${stops()})`}
+function bgCSS(){const arr=[];if(S.bgImage)arr.push(`url("${S.bgImage}")`);arr.push(S.mode==="gradient"?bgLayer():S.bgColor);return arr.join(", ")}
+function textShadow(){return (S.tsb<=0&&S.tsx===0&&S.tsy===0)?"none":`${S.tsx}px ${S.tsy}px ${S.tsb}px ${S.tsc}`}
+function radius(){return `${S.radiusTl}px ${S.radiusTr}px ${S.radiusBr}px ${S.radiusBl}px`}
+function boxShadow(){const outer=`${S.shadowX}px ${S.shadowY}px ${S.shadowBlur}px ${S.shadowSpread}px ${rgba(S.shadowColor,S.shadowOpacity)}`;const inset=`${S.isx}px ${S.isy}px ${S.isb}px ${S.iss}px ${rgba(S.isc,S.iso)} inset`;return S.iso>0?`${outer}, ${inset}`:outer}
+function trans(){return `all ${S.dur}ms ${S.ease} ${S.delay}ms`}
+function anim(){if(S.anim==="pulse")return "pulseAnim 2.3s ease-in-out infinite";if(S.anim==="float")return "floatAnim 3s ease-in-out infinite";if(S.anim==="rotate")return "rotateAnim 4s linear infinite";if(S.anim==="fade")return "fadeAnim 2s ease-in-out infinite";return "none"}
+function declarations(){const imgSize=S.bgImage?`${S.bgImageSize}, auto`:"auto";return `background: ${bgCSS()};
+background-size: ${imgSize};
+background-position: center;
+background-repeat: no-repeat;
+color: ${S.textColor};
+width: ${curr().boxWidth}px;
+min-height: ${curr().boxHeight}px;
+padding: ${curr().paddingY}px ${curr().paddingX}px;
+font-family: "${S.fontFamily}", sans-serif;
+font-size: ${curr().fontSize}px;
+font-weight: ${S.fontWeight};
+letter-spacing: ${S.letterSpacing}px;
+line-height: ${S.lineHeight};
+text-align: ${S.textAlign};
+text-transform: ${S.textTransform};
+text-shadow: ${textShadow()};
+border-top: ${S.btw}px ${S.borderStyle} ${S.btc};
+border-right: ${S.brw}px ${S.borderStyle} ${S.brc};
+border-bottom: ${S.bbw}px ${S.borderStyle} ${S.bbc};
+border-left: ${S.blw}px ${S.borderStyle} ${S.blc};
+border-radius: ${radius()};
+opacity: ${S.opacity};
+box-shadow: ${boxShadow()};
+backdrop-filter: blur(${S.backdropBlur}px);
+-webkit-backdrop-filter: blur(${S.backdropBlur}px);
+transform: translate(${S.dragX}px, ${S.dragY}px) rotate(${S.rotate}deg) scale(${S.scale});
+transition: ${trans()};
+animation: ${anim()};
+display:flex;
+align-items:center;
+justify-content:center;
+box-sizing:border-box;
+overflow:hidden;`}
+function inlineObj(){return `{
+  background: ${JSON.stringify(bgCSS())},
+  backgroundSize: ${JSON.stringify(S.bgImage?`${S.bgImageSize}, auto`:"auto")},
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
+  color: ${JSON.stringify(S.textColor)},
+  width: ${JSON.stringify(curr().boxWidth+"px")},
+  minHeight: ${JSON.stringify(curr().boxHeight+"px")},
+  padding: ${JSON.stringify(`${curr().paddingY}px ${curr().paddingX}px`)},
+  fontFamily: ${JSON.stringify(`${S.fontFamily}, sans-serif`)},
+  fontSize: ${JSON.stringify(curr().fontSize+"px")},
+  fontWeight: ${JSON.stringify(S.fontWeight)},
+  letterSpacing: ${JSON.stringify(S.letterSpacing+"px")},
+  lineHeight: ${JSON.stringify(String(S.lineHeight))},
+  textAlign: ${JSON.stringify(S.textAlign)},
+  textTransform: ${JSON.stringify(S.textTransform)},
+  textShadow: ${JSON.stringify(textShadow())},
+  borderTop: ${JSON.stringify(`${S.btw}px ${S.borderStyle} ${S.btc}`)},
+  borderRight: ${JSON.stringify(`${S.brw}px ${S.borderStyle} ${S.brc}`)},
+  borderBottom: ${JSON.stringify(`${S.bbw}px ${S.borderStyle} ${S.bbc}`)},
+  borderLeft: ${JSON.stringify(`${S.blw}px ${S.borderStyle} ${S.blc}`)},
+  borderRadius: ${JSON.stringify(radius())},
+  opacity: ${S.opacity},
+  boxShadow: ${JSON.stringify(boxShadow())},
+  backdropFilter: ${JSON.stringify(`blur(${S.backdropBlur}px)`)},
+  WebkitBackdropFilter: ${JSON.stringify(`blur(${S.backdropBlur}px)`)},
+  transform: ${JSON.stringify(`translate(${S.dragX}px, ${S.dragY}px) rotate(${S.rotate}deg) scale(${S.scale})`)},
+  transition: ${JSON.stringify(trans())},
+  animation: ${JSON.stringify(anim())},
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  boxSizing: "border-box",
+  overflow: "hidden"
+}`}
+function cssCode(){return `.target {
+  ${declarations().replace(/\n/g,"\n  ")}
+}
+.target:hover {
+  transform: translate(${S.dragX}px, ${S.dragY}px) rotate(${S.rotate+S.hoverRotate}deg) scale(${(S.scale*S.hoverScale).toFixed(3)});
+}
+@keyframes pulseAnim {
+  0%,100% { transform: translate(${S.dragX}px, ${S.dragY}px) rotate(${S.rotate}deg) scale(${S.scale}); }
+  50% { transform: translate(${S.dragX}px, ${S.dragY}px) rotate(${S.rotate}deg) scale(${(S.scale*1.04).toFixed(3)}); }
+}
+@keyframes floatAnim {
+  0%,100% { transform: translate(${S.dragX}px, ${S.dragY}px) rotate(${S.rotate}deg) scale(${S.scale}); }
+  50% { transform: translate(${S.dragX}px, ${S.dragY-12}px) rotate(${S.rotate}deg) scale(${S.scale}); }
+}
+@keyframes rotateAnim {
+  from { transform: translate(${S.dragX}px, ${S.dragY}px) rotate(${S.rotate}deg) scale(${S.scale}); }
+  to { transform: translate(${S.dragX}px, ${S.dragY}px) rotate(${S.rotate+360}deg) scale(${S.scale}); }
+}
+@keyframes fadeAnim {
+  0%,100% { opacity: ${S.opacity}; }
+  50% { opacity: ${Math.max(.2,S.opacity-.35).toFixed(2)}; }
+}`}
+function varsCode(){return `:root {
+  --box-bg: ${bgCSS()};
+  --box-text: ${S.textColor};
+  --box-width: ${curr().boxWidth}px;
+  --box-height: ${curr().boxHeight}px;
+  --box-padding-y: ${curr().paddingY}px;
+  --box-padding-x: ${curr().paddingX}px;
+  --box-radius: ${radius()};
+}
+.target {
+  background: var(--box-bg);
+  color: var(--box-text);
+  width: var(--box-width);
+  min-height: var(--box-height);
+  padding: var(--box-padding-y) var(--box-padding-x);
+}`}
+function tailwindCode(){return `<div className="flex items-center justify-center overflow-hidden text-center" style={${inlineObj()}}>
+  ${esc(S.content)}
+</div>`}
+function scssCode(){return `$box-bg: ${bgCSS()};
+$box-text: ${S.textColor};
+$box-radius: ${radius()};
+.target {
+  ${declarations().replace(/\n/g,"\n  ")}
+}`}
+function reactCode(){return `import React from "react";
+
+export default function PlaygroundBox() {
+  const style = ${inlineObj()};
+  return <div className="target" style={style}>${JSON.stringify(S.content)}</div>;
+}`}
+function htmlCode(){return `<div class="target">${esc(S.content).replace(/\n/g,"<br />")}</div>`}
+function fullCode(){return `<!DOCTYPE html>
+<html lang="${S.lang}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exported Playground</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=${encodeURIComponent(S.fontFamily).replace(/%20/g,"+")}:wght@300;400;500;600;700;800;900&display=swap');
+    html,body{margin:0;min-height:100%;font-family:"${S.fontFamily}",sans-serif;background:#0f172a}
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    ${cssCode()}
+  </style>
+</head>
+<body>
+  ${htmlCode()}
+</body>
+</html>`}
+function updateCode(){const tab=S.codeTab;let out="";if(tab==="css")out=cssCode();if(tab==="vars")out=varsCode();if(tab==="tailwind")out=tailwindCode();if(tab==="scss")out=scssCode();if(tab==="react")out=reactCode();if(tab==="inline")out=inlineObj();if(tab==="html")out=htmlCode();if(tab==="full")out=fullCode();el.code.textContent=out;el.exportText.textContent=tab.toUpperCase()}
+function setCodeTab(tab){S.codeTab=tab;document.querySelectorAll("[data-code]").forEach(b=>b.classList.toggle("active",b.dataset.code===tab));updateCode()}
+function luminance(hex){const h=hex.replace("#","");const rgb=[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)].map(v=>v/255).map(c=>c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4));return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2]}
+function contrast(a,b){const l1=luminance(a),l2=luminance(b),light=Math.max(l1,l2),dark=Math.min(l1,l2);return (light+.05)/(dark+.05)}
+function bgForContrast(){return S.mode==="solid"?S.bgColor:S.c2}
+function updateContrast(){const r=contrast(bgForContrast(),S.textColor),ok=r>=4.5;const txt=`${r.toFixed(2)}:1`;el.contrastText.textContent=txt;el.contrastBadge.textContent=`Contrast: ${txt} · ${ok?T[S.lang].ok:T[S.lang].bad}`;el.contrastBadge.classList.toggle("good",ok);el.contrastBadge.classList.toggle("bad",!ok)}
+function updateVals(){
+  el.bgColorVal.textContent=S.bgColor;el.gradientTypeVal.textContent=S.gradientType;el.c1Val.textContent=S.c1;el.c2Val.textContent=S.c2;el.c3Val.textContent=S.c3;el.c4Val.textContent=S.c4;
+  el.p1Val.textContent=S.p1+"%";el.p2Val.textContent=S.p2+"%";el.p3Val.textContent=S.p3+"%";el.p4Val.textContent=S.p4+"%";el.angleVal.textContent=S.angle+"deg";el.radialXVal.textContent=S.radialX+"%";el.radialYVal.textContent=S.radialY+"%";el.bgImageSizeVal.textContent=S.bgImageSize;el.contentVal.textContent=S.content.length+"ch";el.textColorVal.textContent=S.textColor;el.fontFamilyVal.textContent=S.fontFamily;el.fontSizeVal.textContent=curr().fontSize+"px";el.fontWeightVal.textContent=S.fontWeight;el.letterSpacingVal.textContent=S.letterSpacing+"px";el.lineHeightVal.textContent=S.lineHeight;el.textAlignVal.textContent=S.textAlign;el.textTransformVal.textContent=S.textTransform;el.textShadowBlurVal.textContent=S.tsb+"px";el.textShadowXVal.textContent=S.tsx+"px";el.textShadowYVal.textContent=S.tsy+"px";el.textShadowColorVal.textContent=S.tsc;
+  el.boxWidthVal.textContent=curr().boxWidth+"px";el.boxHeightVal.textContent=curr().boxHeight+"px";el.paddingXVal.textContent=curr().paddingX+"px";el.paddingYVal.textContent=curr().paddingY+"px";el.radiusTlVal.textContent=S.radiusTl+"px";el.radiusTrVal.textContent=S.radiusTr+"px";el.radiusBrVal.textContent=S.radiusBr+"px";el.radiusBlVal.textContent=S.radiusBl+"px";el.borderStyleVal.textContent=S.borderStyle;el.btwVal.textContent=S.btw+"px";el.brwVal.textContent=S.brw+"px";el.bbwVal.textContent=S.bbw+"px";el.blwVal.textContent=S.blw+"px";el.opacityVal.textContent=S.opacity.toFixed(2);el.backdropBlurVal.textContent=S.backdropBlur+"px";el.rotateVal.textContent=S.rotate+"deg";el.scaleVal.textContent=S.scale.toFixed(2);
+  el.shadowXVal.textContent=S.shadowX+"px";el.shadowYVal.textContent=S.shadowY+"px";el.shadowBlurVal.textContent=S.shadowBlur+"px";el.shadowSpreadVal.textContent=S.shadowSpread+"px";el.shadowOpacityVal.textContent=S.shadowOpacity.toFixed(2);el.shadowColorVal.textContent=S.shadowColor;
+  el.isxVal.textContent=S.isx+"px";el.isyVal.textContent=S.isy+"px";el.isbVal.textContent=S.isb+"px";el.issVal.textContent=S.iss+"px";el.isoVal.textContent=S.iso.toFixed(2);el.iscVal.textContent=S.isc;
+  el.animVal.textContent=S.anim;el.durVal.textContent=S.dur+"ms";el.delayVal.textContent=S.delay+"ms";el.easeVal.textContent=S.ease;el.hoverScaleVal.textContent=S.hoverScale.toFixed(2);el.hoverRotateVal.textContent=S.hoverRotate+"deg";
+  el.modeText.textContent=S.mode==="solid"?"Solid":"Gradient / "+S.gradientType;el.sizeText.textContent=`${curr().boxWidth} × ${curr().boxHeight}`;el.bpBadge.textContent=`Breakpoint: ${S.bp}`;el.templateBadge.textContent=`Template: ${S.template}`;
+}
+function updateModeUI(){el.solidBtn.classList.toggle("active",S.mode==="solid");el.gradientBtn.classList.toggle("active",S.mode==="gradient");el.solidWrap.classList.toggle("hidden",S.mode!=="solid");el.gradientTypeWrap.classList.toggle("hidden",S.mode!=="gradient");el.gradientWrap.classList.toggle("hidden",S.mode!=="gradient");el.gradientAdvanced.classList.toggle("hidden",S.mode!=="gradient")}
+function updateThemeUI(){document.body.classList.toggle("light",S.theme==="light");el.darkBtn.classList.toggle("active",S.theme==="dark");el.lightBtn.classList.toggle("active",S.theme==="light")}
+function updateLangUI(){el.roBtn.classList.toggle("active",S.lang==="ro");el.enBtn.classList.toggle("active",S.lang==="en");el.title.textContent=T[S.lang].title;el.subtitle.textContent=T[S.lang].subtitle}
+function updateDeviceUI(){el.device.className="device "+S.device;document.querySelectorAll("[data-device]").forEach(b=>b.classList.toggle("active",b.dataset.device===S.device))}
+function updateLayoutUI(){document.querySelectorAll("[data-layout]").forEach(b=>b.classList.toggle("active",b.dataset.layout===S.layout));el.playground.className="playground mode-"+S.layout}
+function applyHoverStyle(){$("hoverStyle").textContent=`.target:hover{transform:translate(${S.dragX}px,${S.dragY}px) rotate(${S.rotate+S.hoverRotate}deg) scale(${(S.scale*S.hoverScale).toFixed(3)})}
+@keyframes pulseAnim{0%,100%{transform:translate(${S.dragX}px,${S.dragY}px) rotate(${S.rotate}deg) scale(${S.scale})}50%{transform:translate(${S.dragX}px,${S.dragY}px) rotate(${S.rotate}deg) scale(${(S.scale*1.04).toFixed(3)})}}
+@keyframes floatAnim{0%,100%{transform:translate(${S.dragX}px,${S.dragY}px) rotate(${S.rotate}deg) scale(${S.scale})}50%{transform:translate(${S.dragX}px,${S.dragY-12}px) rotate(${S.rotate}deg) scale(${S.scale})}}
+@keyframes rotateAnim{from{transform:translate(${S.dragX}px,${S.dragY}px) rotate(${S.rotate}deg) scale(${S.scale})}to{transform:translate(${S.dragX}px,${S.dragY}px) rotate(${S.rotate+360}deg) scale(${S.scale})}}
+@keyframes fadeAnim{0%,100%{opacity:${S.opacity}}50%{opacity:${Math.max(.2,S.opacity-.35).toFixed(2)}}}`;}
+function applyManual(){$("manualStyle").textContent=`#target{${S.manualCss||""}}`}
+function applyPreview(){
+  updateFont();el.targetContent.innerHTML=esc(S.content).replace(/\n/g,"<br>");
+  el.target.style.cssText=declarations();updateLayoutUI();updateHoverStyle();applyManual();
+  el.previewGrid.classList.toggle("noise",S.noise);
+  if(S.mesh){
+    el.previewWrap.style.background=`radial-gradient(circle at 20% 20%, ${rgba(S.c1,.18)} 0%, transparent 35%), radial-gradient(circle at 80% 30%, ${rgba(S.c2,.16)} 0%, transparent 32%), radial-gradient(circle at 30% 78%, ${rgba(S.c3,.14)} 0%, transparent 36%), radial-gradient(circle at 78% 78%, ${rgba(S.c4,.16)} 0%, transparent 34%), linear-gradient(135deg, rgba(255,255,255,.03), rgba(255,255,255,.015)), rgba(255,255,255,.02)`;
+  }else{
+    el.previewWrap.style.background=`linear-gradient(135deg, rgba(255,255,255,.03), rgba(255,255,255,.015)), rgba(255,255,255,.02)`;
+  }
+}
+function saveCfg(){localStorage.setItem(CFG_KEY,JSON.stringify(S));temp(el.saveCfg,T[S.lang].saved)}
+function loadCfg(){const raw=localStorage.getItem(CFG_KEY);if(!raw)return;pushUndo();S={...clone(DEFAULT),...JSON.parse(raw)};refresh(true);temp(el.loadCfg,T[S.lang].loaded)}
+function undo(){if(!undoStack.length)return;redoStack.push(clone(S));S=undoStack.pop();refresh(true)}
+function redo(){if(!redoStack.length)return;undoStack.push(clone(S));S=redoStack.pop();refresh(true)}
+function savePresets(){localStorage.setItem(PRESET_KEY,JSON.stringify(presets))}
+function renderPresetSelect(){const keys=Object.keys(presets);el.presetSelect.innerHTML=keys.length?keys.map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join(""):`<option value="">--</option>`}
+function addPreset(){const n=el.presetName.value.trim();if(!n)return;presets[n]=clone(S);savePresets();renderPresetSelect()}
+function loadPreset(){const n=el.presetSelect.value;if(!n||!presets[n])return;pushUndo();S=clone(presets[n]);refresh(true)}
+function delPreset(){const n=el.presetSelect.value;if(!n||!presets[n])return;delete presets[n];savePresets();renderPresetSelect()}
+function addSnap(){snapshots.unshift({id:String(Date.now()),title:`${S.template} · ${new Date().toLocaleTimeString()}`,state:clone(S)});if(snapshots.length>20)snapshots.pop();localStorage.setItem(SNAP_KEY,JSON.stringify(snapshots));renderSnaps();temp(el.addSnap,T[S.lang].snap)}
+function renderSnaps(){if(!snapshots.length){el.historyList.innerHTML=`<div class="small">No snapshots yet.</div>`;return}el.historyList.innerHTML=snapshots.map(s=>`<div class="historyItem"><div><strong>${esc(s.title)}</strong><div class="small">${esc(s.state.mode)}</div></div><div class="history-actions"><button class="history-btn" data-load="${s.id}" type="button">Load</button><button class="history-btn" data-del="${s.id}" type="button">Delete</button></div></div>`).join("");el.historyList.querySelectorAll("[data-load]").forEach(b=>b.onclick=()=>{const s=snapshots.find(x=>x.id===b.dataset.load);if(!s)return;pushUndo();S=clone(s.state);refresh(true)});el.historyList.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{snapshots=snapshots.filter(x=>x.id!==b.dataset.del);localStorage.setItem(SNAP_KEY,JSON.stringify(snapshots));renderSnaps()})}
+function clearSnaps(){snapshots=[];localStorage.setItem(SNAP_KEY,JSON.stringify(snapshots));renderSnaps()}
+function shareEncode(){return btoa(unescape(encodeURIComponent(JSON.stringify(S))))}
+function shareDecode(s){return JSON.parse(decodeURIComponent(escape(atob(s))))}
+function updateUrl(){try{const u=new URL(location.href);u.searchParams.set("cfg",shareEncode());history.replaceState({}, "", u.toString())}catch(e){}}
+async function copyShare(){try{await navigator.clipboard.writeText(location.href);temp(el.shareBtn,T[S.lang].shared)}catch(e){}}
+async function copyText(txt,btn){try{await navigator.clipboard.writeText(txt);temp(btn,T[S.lang].copied)}catch(e){}}
+function downloadHtml(){const blob=new Blob([fullCode()],{type:"text/html;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="front-end-playground-ultra-plus.html";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
+function randHex(){return "#"+Math.floor(Math.random()*16777215).toString(16).padStart(6,"0")}
+function randomize(){pushUndo();S.mode=Math.random()>.4?"gradient":"solid";S.gradientType=["linear","radial","conic","mesh"][Math.floor(Math.random()*4)];S.bgColor=randHex();S.textColor=randHex();S.c1=randHex();S.c2=randHex();S.c3=randHex();S.c4=randHex();S.p1=0;S.p2=Math.floor(Math.random()*30)+20;S.p3=Math.floor(Math.random()*20)+55;S.p4=100;S.angle=Math.floor(Math.random()*361);S.radialX=Math.floor(Math.random()*101);S.radialY=Math.floor(Math.random()*101);S.fontFamily=FONTS[Math.floor(Math.random()*FONTS.length)];S.fontWeight=["400","500","600","700","800","900"][Math.floor(Math.random()*6)];S.letterSpacing=+(Math.random()*4).toFixed(1);S.lineHeight=+(1+Math.random()).toFixed(2);S.textAlign=["left","center","right"][Math.floor(Math.random()*3)];S.textTransform=["none","uppercase","capitalize"][Math.floor(Math.random()*3)];S.radiusTl=Math.floor(Math.random()*80);S.radiusTr=Math.floor(Math.random()*80);S.radiusBr=Math.floor(Math.random()*80);S.radiusBl=Math.floor(Math.random()*80);S.btw=Math.floor(Math.random()*8);S.brw=Math.floor(Math.random()*8);S.bbw=Math.floor(Math.random()*8);S.blw=Math.floor(Math.random()*8);S.btc=randHex();S.brc=randHex();S.bbc=randHex();S.blc=randHex();S.opacity=+(.7+Math.random()*.3).toFixed(2);S.backdropBlur=Math.floor(Math.random()*18);S.rotate=Math.floor(Math.random()*21)-10;S.scale=+(.9+Math.random()*.2).toFixed(2);S.shadowX=Math.floor(Math.random()*30)-15;S.shadowY=Math.floor(Math.random()*40);S.shadowBlur=Math.floor(Math.random()*70)+8;S.shadowSpread=Math.floor(Math.random()*16)-4;S.shadowOpacity=+(Math.random()*.4).toFixed(2);S.isb=Math.floor(Math.random()*24);S.iso=+(Math.random()*.25).toFixed(2);S.anim=["none","pulse","float","rotate","fade"][Math.floor(Math.random()*5)];S.dur=(Math.floor(Math.random()*15)+4)*100;S.hoverScale=+(1+Math.random()*.15).toFixed(2);S.hoverRotate=Math.floor(Math.random()*10)-5;["base","mobile","tablet","desktop"].forEach(bp=>S.responsive[bp]={boxWidth:Math.floor(Math.random()*240)+220,boxHeight:Math.floor(Math.random()*180)+120,fontSize:Math.floor(Math.random()*22)+16,paddingX:Math.floor(Math.random()*30)+12,paddingY:Math.floor(Math.random()*26)+10});refresh(true)}
+function applyPreset(name){pushUndo();if(name==="glass"){Object.assign(S,{mode:"gradient",gradientType:"linear",c1:"#ffffff",c2:"#7dd3fc",c3:"#a78bfa",c4:"#ffffff",p1:0,p2:30,p3:72,p4:100,textColor:"#ffffff",bgColor:"#0f172a",backdropBlur:14,shadowBlur:40,shadowOpacity:.22,isb:16,iso:.12,btc:"#ffffff66",brc:"#ffffff44",bbc:"#ffffff33",blc:"#ffffff55"})}
+if(name==="sunset"){Object.assign(S,{mode:"gradient",gradientType:"linear",c1:"#fb7185",c2:"#f59e0b",c3:"#f97316",c4:"#ec4899",p1:0,p2:35,p3:75,p4:100,textColor:"#fff7ed",shadowBlur:34,shadowOpacity:.26})}
+if(name==="neon"){Object.assign(S,{mode:"gradient",gradientType:"mesh",c1:"#22d3ee",c2:"#8b5cf6",c3:"#ec4899",c4:"#14b8a6",textColor:"#ecfeff",shadowBlur:42,shadowSpread:2,shadowOpacity:.35,btc:"#67e8f9",brc:"#67e8f9",bbc:"#67e8f9",blc:"#67e8f9"})}
+if(name==="minimal"){Object.assign(S,{mode:"solid",bgColor:"#e2e8f0",textColor:"#0f172a",shadowBlur:18,shadowOpacity:.12,backdropBlur:0,btc:"#cbd5e1",brc:"#cbd5e1",bbc:"#cbd5e1",blc:"#cbd5e1"})}
+refresh(true)}
+function applyTemplate(name){pushUndo();S.template=name;if(name==="button"){S.content=S.lang==="ro"?"Apasă aici":"Click here";curr().boxWidth=220;curr().boxHeight=56;curr().paddingX=22;curr().paddingY=12;S.radiusTl=S.radiusTr=S.radiusBr=S.radiusBl=999}
+if(name==="card"){S.content=S.lang==="ro"?"Card modern\ncu conținut":"Modern card\nwith content";curr().boxWidth=360;curr().boxHeight=220;S.radiusTl=S.radiusTr=S.radiusBr=S.radiusBl=24}
+if(name==="input"){S.content="Placeholder text";curr().boxWidth=320;curr().boxHeight=54;S.textAlign="left";S.radiusTl=S.radiusTr=S.radiusBr=S.radiusBl=14}
+if(name==="box"){S.content=S.lang==="ro"?"Previzualizare live":"Live Preview";curr().boxWidth=320;curr().boxHeight=200}
+refresh(true)}
+function loadData(){const u=new URL(location.href);const cfg=u.searchParams.get("cfg");if(cfg){try{S={...clone(DEFAULT),...shareDecode(cfg)}}catch(e){}}
+const raw=localStorage.getItem(CFG_KEY);if(raw&&!cfg)S={...clone(DEFAULT),...JSON.parse(raw)};const p=localStorage.getItem(PRESET_KEY);if(p)presets=JSON.parse(p);const sn=localStorage.getItem(SNAP_KEY);if(sn)snapshots=JSON.parse(sn)}
+function refresh(setInputsFlag=false){if(setInputsFlag)setInputs();else syncFromInputs();updateLangUI();updateThemeUI();updateModeUI();updateDeviceUI();updateVals();updateContrast();applyPreview();updateCode();renderPresetSelect();renderSnaps();updateUrl();document.querySelectorAll("[data-bp]").forEach(b=>b.classList.toggle("active",b.dataset.bp===S.bp));document.querySelectorAll("[data-template]").forEach(b=>b.classList.toggle("active",b.dataset.template===S.template));el.noiseBtn.classList.toggle("active",S.noise);el.meshBtn.classList.toggle("active",S.mesh)}
+function ptr(e){const p=e.touches?e.touches[0]:e;return{x:p.clientX,y:p.clientY}}
+function startDrag(e){if(e.target===el.resize)return;e.preventDefault();const p=ptr(e);drag={x:p.x,y:p.y,ox:S.dragX,oy:S.dragY}}
+function startResize(e){e.preventDefault();e.stopPropagation();const p=ptr(e);resz={x:p.x,y:p.y,w:curr().boxWidth,h:curr().boxHeight}}
+function move(e){if(drag){const p=ptr(e);S.dragX=Math.round(drag.ox+(p.x-drag.x));S.dragY=Math.round(drag.oy+(p.y-drag.y));applyPreview();updateCode()}if(resz){const p=ptr(e);curr().boxWidth=Math.max(60,Math.round(resz.w+(p.x-resz.x)));curr().boxHeight=Math.max(40,Math.round(resz.h+(p.y-resz.y)));applyRespInputs();applyPreview();updateVals();updateCode()}}
+function endMove(){if(drag||resz){drag=null;resz=null;refresh(false)}}
+function bind(){
+  const inputs=[el.bgColor,el.gradientType,el.c1,el.c2,el.c3,el.c4,el.p1,el.p2,el.p3,el.p4,el.angle,el.radialX,el.radialY,el.bgImageSize,el.content,el.textColor,el.fontFamily,el.fontSize,el.fontWeight,el.letterSpacing,el.lineHeight,el.textAlign,el.textTransform,el.textShadowX,el.textShadowY,el.textShadowBlur,el.textShadowColor,el.boxWidth,el.boxHeight,el.paddingX,el.paddingY,el.radiusTl,el.radiusTr,el.radiusBr,el.radiusBl,el.borderStyle,el.btw,el.brw,el.bbw,el.blw,el.btc,el.brc,el.bbc,el.blc,el.opacity,el.backdropBlur,el.rotate,el.scale,el.shadowX,el.shadowY,el.shadowBlur,el.shadowSpread,el.shadowOpacity,el.shadowColor,el.isx,el.isy,el.isb,el.iss,el.iso,el.isc,el.anim,el.dur,el.delay,el.ease,el.hoverScale,el.hoverRotate];
+  inputs.forEach(i=>i.addEventListener("input",()=>{if(syncing)return;pushUndo();refresh(false)}));
+  el.bgImage.addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{pushUndo();S.bgImage=r.result;refresh(true)};r.readAsDataURL(f)});
+  el.solidBtn.onclick=()=>{pushUndo();S.mode="solid";refresh(true)};
+  el.gradientBtn.onclick=()=>{pushUndo();S.mode="gradient";refresh(true)};
+  el.roBtn.onclick=()=>{pushUndo();S.lang="ro";refresh(false)};
+  el.enBtn.onclick=()=>{pushUndo();S.lang="en";refresh(false)};
+  el.darkBtn.onclick=()=>{pushUndo();S.theme="dark";refresh(false)};
+  el.lightBtn.onclick=()=>{pushUndo();S.theme="light";refresh(false)};
+  document.querySelectorAll("[data-bp]").forEach(b=>b.onclick=()=>{S.bp=b.dataset.bp;applyRespInputs();refresh(false)});
+  document.querySelectorAll("[data-device]").forEach(b=>b.onclick=()=>{S.device=b.dataset.device;refresh(false)});
+  document.querySelectorAll("[data-layout]").forEach(b=>b.onclick=()=>{pushUndo();S.layout=b.dataset.layout;refresh(false)});
+  document.querySelectorAll("[data-template]").forEach(b=>b.onclick=()=>applyTemplate(b.dataset.template));
+  document.querySelectorAll("[data-preset]").forEach(b=>b.onclick=()=>applyPreset(b.dataset.preset));
+  document.querySelectorAll("[data-code]").forEach(b=>b.onclick=()=>setCodeTab(b.dataset.code));
+  el.noiseBtn.onclick=()=>{pushUndo();S.noise=!S.noise;refresh(false)};
+  el.meshBtn.onclick=()=>{pushUndo();S.mesh=!S.mesh;refresh(false)};
+  el.copyCode.onclick=()=>copyText(el.code.textContent,el.copyCode);
+  el.downloadHtml.onclick=downloadHtml;
+  el.copyReact.onclick=()=>copyText(reactCode(),el.copyReact);
+  el.copyInline.onclick=()=>copyText(inlineObj(),el.copyInline);
+  el.randomize.onclick=randomize;
+  el.undo.onclick=undo; el.redo.onclick=redo; el.saveCfg.onclick=saveCfg; el.loadCfg.onclick=loadCfg;
+  el.reset.onclick=()=>{pushUndo();S=clone(DEFAULT);refresh(true)};
+  el.savePreset.onclick=addPreset; el.loadPreset.onclick=loadPreset; el.deletePreset.onclick=delPreset; el.shareBtn.onclick=copyShare;
+  el.addSnap.onclick=addSnap; el.clearSnap.onclick=clearSnaps;
+  el.applyManual.onclick=()=>{pushUndo();S.manualCss=el.manualCss.value.trim();applyManual();temp(el.applyManual,T[S.lang].applied)};
+  el.resetManual.onclick=()=>{pushUndo();S.manualCss="";el.manualCss.value="";applyManual()};
+  el.target.addEventListener("mousedown",startDrag); el.target.addEventListener("touchstart",startDrag,{passive:false});
+  el.resize.addEventListener("mousedown",startResize); el.resize.addEventListener("touchstart",startResize,{passive:false});
+  window.addEventListener("mousemove",move); window.addEventListener("touchmove",move,{passive:false}); window.addEventListener("mouseup",endMove); window.addEventListener("touchend",endMove);
+}
+loadData();setInputs();bind();setCodeTab(S.codeTab);refresh(true);
+</script>
+</body>
+</html>
